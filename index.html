@@ -1,0 +1,3549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+
+<title>Glass Messenger</title>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+
+<style>
+*{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html,
+body{
+    width:100%;
+    height:100%;
+    margin:0;
+    overflow:hidden;
+}
+
+body{
+    font-family:Inter,Arial,sans-serif;
+    background:#030407;
+    color:#fff;
+}
+
+/* =========================
+   BACKGROUND
+========================= */
+
+.bg{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    z-index:-10;
+
+    background:
+        radial-gradient(
+            circle at 50% 50%,
+            #111722 0%,
+            #07090e 45%,
+            #020305 100%
+        );
+}
+
+.blob{
+    position:absolute;
+    width:330px;
+    height:330px;
+    border-radius:50%;
+    filter:blur(100px);
+    opacity:.18;
+
+    animation:
+        blobMove 14s ease-in-out infinite alternate;
+}
+
+.blob.one{
+    background:#00eaff;
+    top:-180px;
+    left:-130px;
+}
+
+.blob.two{
+    background:#7c4dff;
+    right:-180px;
+    bottom:-190px;
+    animation-delay:-5s;
+}
+
+.blob.three{
+    width:210px;
+    height:210px;
+    background:#ff267f;
+    left:42%;
+    top:42%;
+    opacity:.08;
+    animation-delay:-9s;
+}
+
+@keyframes blobMove{
+    from{
+        transform:translate(0,0) scale(1);
+    }
+
+    to{
+        transform:translate(110px,80px) scale(1.3);
+    }
+}
+
+.grid{
+    position:absolute;
+    inset:0;
+
+    opacity:.13;
+
+    background-image:
+        linear-gradient(
+            rgba(255,255,255,.025) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.025) 1px,
+            transparent 1px
+        );
+
+    background-size:45px 45px;
+
+    mask-image:
+        linear-gradient(
+            to bottom,
+            transparent,
+            black 25%,
+            black 75%,
+            transparent
+        );
+
+    animation:gridMove 15s linear infinite;
+}
+
+@keyframes gridMove{
+    from{
+        background-position:0 0;
+    }
+
+    to{
+        background-position:0 90px;
+    }
+}
+
+.particle{
+    position:absolute;
+
+    width:2px;
+    height:2px;
+
+    border-radius:50%;
+
+    background:#fff;
+
+    opacity:.3;
+
+    animation:
+        particleMove 8s linear infinite;
+}
+
+.p1{
+    left:15%;
+    top:80%;
+    animation-delay:-2s;
+}
+
+.p2{
+    left:30%;
+    top:20%;
+    animation-delay:-5s;
+}
+
+.p3{
+    left:70%;
+    top:30%;
+    animation-delay:-1s;
+}
+
+.p4{
+    left:85%;
+    top:70%;
+    animation-delay:-6s;
+}
+
+.p5{
+    left:55%;
+    top:85%;
+    animation-delay:-3s;
+}
+
+@keyframes particleMove{
+    0%{
+        transform:translateY(30px);
+        opacity:0;
+    }
+
+    30%{
+        opacity:.5;
+    }
+
+    70%{
+        opacity:.2;
+    }
+
+    100%{
+        transform:translateY(-120px);
+        opacity:0;
+    }
+}
+
+/* =========================
+   APP
+========================= */
+
+.app{
+    width:min(94vw,420px);
+    height:100%;
+
+    margin:auto;
+    padding:16px;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.header{
+    text-align:center;
+    margin-bottom:14px;
+}
+
+.badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+
+    padding:5px 10px;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:30px;
+
+    background:rgba(255,255,255,.025);
+
+    color:#66707f;
+
+    font-size:7px;
+
+    letter-spacing:2px;
+
+    backdrop-filter:blur(15px);
+}
+
+.badge i{
+    width:5px;
+    height:5px;
+
+    border-radius:50%;
+
+    background:#43ffc2;
+
+    box-shadow:
+        0 0 10px #43ffc2;
+
+    animation:pulse 1.6s infinite;
+}
+
+@keyframes pulse{
+    50%{
+        transform:scale(1.5);
+        opacity:.45;
+    }
+}
+
+h1{
+    margin:8px 0 2px;
+
+    font-size:34px;
+    line-height:1;
+
+    font-weight:900;
+
+    letter-spacing:-2px;
+}
+
+h1 span{
+    color:#00eaff;
+
+    text-shadow:
+        0 0 10px rgba(0,234,255,.8),
+        0 0 35px rgba(0,234,255,.3);
+}
+
+.subtitle{
+    color:#505866;
+
+    font-size:7px;
+
+    letter-spacing:2px;
+}
+
+/* =========================
+   PAGE
+========================= */
+
+.page{
+    width:100%;
+}
+
+/* =========================
+   GLASS CARD
+========================= */
+
+.glass{
+    border:1px solid rgba(255,255,255,.075);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.055),
+            rgba(255,255,255,.018)
+        );
+
+    border-radius:18px;
+
+    box-shadow:
+        0 25px 80px rgba(0,0,0,.45),
+        inset 0 0 30px rgba(255,255,255,.012);
+
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+}
+
+/* =========================
+   HOME
+========================= */
+
+.homeCard{
+    padding:12px;
+}
+
+.createBtn{
+    width:100%;
+    height:50px;
+
+    border:1px solid rgba(0,234,255,.2);
+
+    border-radius:14px;
+
+    background:
+        linear-gradient(
+            100deg,
+            rgba(0,234,255,.11),
+            rgba(124,77,255,.11)
+        );
+
+    color:#fff;
+
+    font-family:inherit;
+    font-size:11px;
+    font-weight:800;
+
+    cursor:pointer;
+
+    box-shadow:
+        inset 0 0 25px rgba(0,234,255,.025),
+        0 10px 35px rgba(0,0,0,.25);
+
+    backdrop-filter:blur(15px);
+
+    transition:.22s;
+}
+
+.createBtn:hover{
+    transform:translateY(-2px);
+
+    border-color:
+        rgba(0,234,255,.5);
+
+    box-shadow:
+        0 12px 35px rgba(0,234,255,.1);
+}
+
+.joinRow{
+    display:flex;
+    gap:7px;
+
+    margin-top:8px;
+}
+
+input{
+    min-width:0;
+
+    outline:none;
+
+    color:#fff;
+
+    font-family:inherit;
+}
+
+.roomInput{
+    flex:1;
+
+    height:43px;
+
+    border:1px solid rgba(255,255,255,.07);
+
+    border-radius:13px;
+
+    background:rgba(255,255,255,.035);
+
+    text-align:center;
+
+    font-size:15px;
+
+    letter-spacing:5px;
+
+    backdrop-filter:blur(15px);
+
+    transition:.2s;
+}
+
+.roomInput:focus{
+    border-color:
+        rgba(0,234,255,.35);
+
+    box-shadow:
+        0 0 25px rgba(0,234,255,.07);
+}
+
+.roomInput::placeholder{
+    color:#48505d;
+
+    font-size:8px;
+
+    letter-spacing:0;
+}
+
+.joinBtn{
+    width:92px;
+    height:43px;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:13px;
+
+    background:
+        rgba(255,255,255,.045);
+
+    color:#fff;
+
+    font-family:inherit;
+    font-size:10px;
+    font-weight:bold;
+
+    cursor:pointer;
+
+    backdrop-filter:blur(15px);
+
+    transition:.2s;
+}
+
+.joinBtn:hover{
+    color:#00eaff;
+
+    border-color:
+        rgba(0,234,255,.4);
+
+    background:
+        rgba(0,234,255,.055);
+}
+
+/* =========================
+   WAITING
+========================= */
+
+.waiting{
+    display:none;
+
+    margin-top:9px;
+
+    padding:14px;
+
+    text-align:center;
+
+    border-radius:15px;
+
+    border:1px solid rgba(255,255,255,.06);
+
+    background:rgba(255,255,255,.025);
+
+    animation:fadeIn .25s ease;
+}
+
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(5px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+.waitingLabel{
+    color:#707987;
+    font-size:8px;
+}
+
+.waitingCode{
+    margin-top:5px;
+
+    color:#00eaff;
+
+    font-size:27px;
+
+    font-weight:900;
+
+    letter-spacing:7px;
+
+    text-shadow:
+        0 0 12px rgba(0,234,255,.6),
+        0 0 35px rgba(0,234,255,.2);
+}
+
+.waitingStatus{
+    margin-top:7px;
+
+    color:#66707d;
+
+    font-size:8px;
+}
+
+.waitingStatus.online{
+    color:#43ffc2;
+}
+
+/* =========================
+   CHAT
+========================= */
+
+.chatPage{
+    display:none;
+}
+
+.chatCard{
+    height:min(620px,76vh);
+
+    display:flex;
+    flex-direction:column;
+
+    overflow:hidden;
+}
+
+.chatTop{
+    padding:10px 11px;
+
+    display:flex;
+    align-items:center;
+    gap:9px;
+
+    border-bottom:1px solid rgba(255,255,255,.055);
+}
+
+.connectionDot{
+    width:8px;
+    height:8px;
+
+    flex:none;
+
+    border-radius:50%;
+
+    background:#ff4d91;
+
+    box-shadow:
+        0 0 12px rgba(255,77,145,.5);
+
+    transition:.25s;
+}
+
+.connectionDot.online{
+    background:#43ffc2;
+
+    box-shadow:
+        0 0 12px rgba(67,255,194,.7);
+}
+
+.chatTitle{
+    min-width:0;
+    flex:1;
+}
+
+.chatTitle b{
+    display:block;
+
+    color:#dce2eb;
+
+    font-size:10px;
+}
+
+.chatTitle small{
+    display:block;
+
+    margin-top:2px;
+
+    color:#505a68;
+
+    font-size:7px;
+}
+
+.roomMini{
+    color:#00eaff;
+
+    font-size:8px;
+
+    letter-spacing:2px;
+
+    font-weight:bold;
+}
+
+/* =========================
+   MESSAGES
+========================= */
+
+.messagesWrap{
+    position:relative;
+
+    flex:1;
+
+    min-height:0;
+}
+
+.messages{
+    width:100%;
+    height:100%;
+
+    padding:12px;
+
+    overflow-y:auto;
+    overflow-x:hidden;
+
+    display:flex;
+    flex-direction:column;
+
+    gap:7px;
+
+    scrollbar-width:thin;
+
+    scrollbar-color:
+        rgba(0,234,255,.2)
+        transparent;
+}
+
+.messages::-webkit-scrollbar{
+    width:4px;
+}
+
+.messages::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+.messages::-webkit-scrollbar-thumb{
+    background:
+        rgba(0,234,255,.18);
+
+    border-radius:10px;
+}
+
+.empty{
+    height:100%;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+
+    color:#39414d;
+
+    font-size:8px;
+}
+
+.message{
+    max-width:80%;
+
+    padding:8px 10px;
+
+    border-radius:12px;
+
+    font-size:9px;
+
+    line-height:1.45;
+
+    word-break:break-word;
+
+    animation:
+        messageIn .18s ease;
+}
+
+@keyframes messageIn{
+    from{
+        opacity:0;
+        transform:translateY(4px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+.message.me{
+    align-self:flex-end;
+
+    color:#b7f5ff;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(0,234,255,.10),
+            rgba(0,234,255,.035)
+        );
+
+    border:
+        1px solid rgba(0,234,255,.13);
+
+    box-shadow:
+        0 5px 20px rgba(0,234,255,.025);
+}
+
+.message.enemy{
+    align-self:flex-start;
+
+    color:#e2e5eb;
+
+    background:
+        rgba(255,255,255,.035);
+
+    border:
+        1px solid rgba(255,255,255,.06);
+}
+
+.message.system{
+    align-self:center;
+
+    max-width:90%;
+
+    padding:5px 8px;
+
+    color:#596371;
+
+    background:
+        rgba(255,255,255,.018);
+
+    border:
+        1px solid rgba(255,255,255,.035);
+
+    font-size:7px;
+}
+
+/* =========================
+   FILE MESSAGE
+========================= */
+
+.fileMessage{
+    min-width:180px;
+}
+
+.fileIcon{
+    width:34px;
+    height:34px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    float:left;
+
+    margin-right:7px;
+
+    border-radius:9px;
+
+    background:
+        rgba(0,234,255,.06);
+
+    border:
+        1px solid rgba(0,234,255,.12);
+
+    color:#00eaff;
+
+    font-size:15px;
+}
+
+.fileName{
+    display:block;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+
+    white-space:nowrap;
+
+    color:#dce5ed;
+
+    font-size:8px;
+
+    font-weight:bold;
+}
+
+.fileSize{
+    display:block;
+
+    margin-top:4px;
+
+    color:#65707e;
+
+    font-size:7px;
+}
+
+.downloadBtn{
+    width:100%;
+
+    height:25px;
+
+    margin-top:8px;
+
+    border:1px solid rgba(0,234,255,.12);
+
+    border-radius:8px;
+
+    background:
+        rgba(0,234,255,.035);
+
+    color:#7e8b98;
+
+    font-family:inherit;
+
+    font-size:7px;
+
+    cursor:pointer;
+}
+
+.downloadBtn:hover{
+    color:#00eaff;
+
+    border-color:
+        rgba(0,234,255,.3);
+}
+
+/* =========================
+   SCROLL BUTTON
+========================= */
+
+.scrollBtn{
+    position:absolute;
+
+    right:10px;
+    bottom:10px;
+
+    width:27px;
+    height:27px;
+
+    display:none;
+
+    align-items:center;
+    justify-content:center;
+
+    border:
+        1px solid rgba(0,234,255,.2);
+
+    border-radius:50%;
+
+    background:
+        rgba(3,5,8,.88);
+
+    color:#00eaff;
+
+    cursor:pointer;
+
+    backdrop-filter:blur(15px);
+}
+
+.scrollBtn.show{
+    display:flex;
+}
+
+/* =========================
+   UPLOAD
+========================= */
+
+.uploadBox{
+    display:none;
+
+    margin:0 10px 7px;
+
+    padding:7px 9px;
+
+    border:
+        1px solid rgba(0,234,255,.11);
+
+    border-radius:10px;
+
+    background:
+        rgba(0,234,255,.025);
+}
+
+.uploadTop{
+    display:flex;
+    justify-content:space-between;
+
+    color:#71808e;
+
+    font-size:7px;
+}
+
+.uploadPercent{
+    color:#00eaff;
+}
+
+.progress{
+    height:4px;
+
+    margin-top:6px;
+
+    overflow:hidden;
+
+    border-radius:20px;
+
+    background:
+        rgba(255,255,255,.05);
+}
+
+.progressBar{
+    width:0;
+    height:100%;
+
+    border-radius:20px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #00eaff,
+            #7c4dff
+        );
+
+    box-shadow:
+        0 0 10px rgba(0,234,255,.5);
+
+    transition:width .12s linear;
+}
+
+/* =========================
+   INPUT AREA
+========================= */
+
+.inputArea{
+    padding:7px;
+
+    display:flex;
+
+    gap:5px;
+
+    border-top:
+        1px solid rgba(255,255,255,.05);
+}
+
+.chatInput{
+    min-width:0;
+    flex:1;
+
+    height:38px;
+
+    padding:0 10px;
+
+    border:
+        1px solid rgba(255,255,255,.065);
+
+    border-radius:11px;
+
+    background:
+        rgba(255,255,255,.025);
+
+    color:#fff;
+
+    font-size:9px;
+
+    letter-spacing:0;
+
+    text-align:left;
+
+    backdrop-filter:blur(15px);
+}
+
+.chatInput:focus{
+    border-color:
+        rgba(0,234,255,.25);
+
+    box-shadow:
+        0 0 18px rgba(0,234,255,.04);
+}
+
+.chatInput::placeholder{
+    color:#4b5562;
+}
+
+.iconBtn,
+.sendBtn{
+    width:38px;
+    height:38px;
+
+    flex:none;
+
+    border:
+        1px solid rgba(255,255,255,.07);
+
+    border-radius:11px;
+
+    background:
+        rgba(255,255,255,.035);
+
+    color:#7b8794;
+
+    font-family:inherit;
+
+    cursor:pointer;
+
+    backdrop-filter:blur(15px);
+
+    transition:.2s;
+}
+
+.iconBtn:hover{
+    color:#00eaff;
+
+    border-color:
+        rgba(0,234,255,.25);
+
+    background:
+        rgba(0,234,255,.05);
+}
+
+.sendBtn{
+    color:#00eaff;
+
+    border-color:
+        rgba(0,234,255,.14);
+
+    background:
+        rgba(0,234,255,.045);
+}
+
+.sendBtn:hover{
+    border-color:
+        rgba(0,234,255,.4);
+
+    box-shadow:
+        0 0 18px rgba(0,234,255,.08);
+}
+
+input[type=file]{
+    display:none;
+}
+
+/* =========================
+   BOTTOM
+========================= */
+
+.chatBottom{
+    display:flex;
+
+    gap:5px;
+
+    padding:0 7px 7px;
+}
+
+.bottomBtn{
+    flex:1;
+
+    height:29px;
+
+    border:
+        1px solid rgba(255,255,255,.055);
+
+    border-radius:9px;
+
+    background:
+        rgba(255,255,255,.02);
+
+    color:#596472;
+
+    font-family:inherit;
+
+    font-size:7px;
+
+    cursor:pointer;
+
+    backdrop-filter:blur(15px);
+
+    transition:.2s;
+}
+
+.bottomBtn:hover{
+    color:#fff;
+
+    border-color:
+        rgba(0,234,255,.2);
+}
+
+.reconnectBtn{
+    color:#43ffc2;
+}
+
+.reconnectBtn.hidden{
+    display:none;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.footer{
+    margin-top:8px;
+
+    text-align:center;
+
+    color:#303743;
+
+    font-size:6px;
+
+    letter-spacing:1px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-height:650px){
+
+    .app{
+        padding:9px;
+    }
+
+    .header{
+        margin-bottom:8px;
+    }
+
+    h1{
+        font-size:27px;
+    }
+
+    .chatCard{
+        height:76vh;
+    }
+}
+
+@media(max-width:360px){
+
+    .app{
+        width:96vw;
+        padding:8px;
+    }
+
+    .chatCard{
+        height:78vh;
+    }
+
+    .message{
+        max-width:88%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="bg">
+
+    <div class="blob one"></div>
+    <div class="blob two"></div>
+    <div class="blob three"></div>
+
+    <div class="grid"></div>
+
+    <i class="particle p1"></i>
+    <i class="particle p2"></i>
+    <i class="particle p3"></i>
+    <i class="particle p4"></i>
+    <i class="particle p5"></i>
+
+</div>
+
+
+<main class="app">
+
+    <header class="header">
+
+        <div class="badge">
+            <i></i>
+            PEER TO PEER
+        </div>
+
+        <h1>
+            GLASS<span>.</span>
+        </h1>
+
+        <div class="subtitle">
+            PRIVATE ONLINE MESSENGER
+        </div>
+
+    </header>
+
+
+    <!-- HOME -->
+
+    <section
+        id="homePage"
+        class="page"
+    >
+
+        <div class="glass homeCard">
+
+            <button
+                id="createBtn"
+                class="createBtn"
+                onclick="createRoom()"
+            >
+                ✦ Create Room
+            </button>
+
+
+            <div class="joinRow">
+
+                <input
+                    id="roomInput"
+                    class="roomInput"
+                    maxlength="6"
+                    autocomplete="off"
+                    placeholder="ROOM CODE"
+                    oninput="this.value=this.value.toUpperCase()"
+                >
+
+                <button
+                    class="joinBtn"
+                    onclick="joinRoom()"
+                >
+                    Join
+                </button>
+
+            </div>
+
+
+            <div
+                id="waiting"
+                class="waiting"
+            >
+
+                <div class="waitingLabel">
+                    SHARE THIS ROOM CODE
+                </div>
+
+                <div
+                    id="waitingCode"
+                    class="waitingCode"
+                >
+                    ------
+                </div>
+
+                <button
+                    class="bottomBtn"
+                    style="width:100%;margin-top:9px"
+                    onclick="copyRoomCode()"
+                >
+                    Copy Room Code
+                </button>
+
+                <div
+                    id="waitingStatus"
+                    class="waitingStatus"
+                >
+                    Creating room...
+                </div>
+
+                <button
+                    class="bottomBtn"
+                    style="width:100%;margin-top:7px"
+                    onclick="backHome()"
+                >
+                    ← Back
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- CHAT -->
+
+    <section
+        id="chatPage"
+        class="page chatPage"
+    >
+
+        <div class="glass chatCard">
+
+            <div class="chatTop">
+
+                <div
+                    id="connectionDot"
+                    class="connectionDot"
+                ></div>
+
+                <div class="chatTitle">
+
+                    <b>
+                        Secure Chat
+                    </b>
+
+                    <small id="connectionStatus">
+                        Connecting...
+                    </small>
+
+                </div>
+
+                <div
+                    id="roomMini"
+                    class="roomMini"
+                >
+                    ------
+                </div>
+
+            </div>
+
+
+            <div class="messagesWrap">
+
+                <div
+                    id="messages"
+                    class="messages"
+                >
+
+                    <div class="empty">
+                        Your private conversation starts here.
+                    </div>
+
+                </div>
+
+
+                <button
+                    id="scrollBtn"
+                    class="scrollBtn"
+                    onclick="scrollToBottom()"
+                >
+                    ↓
+                </button>
+
+            </div>
+
+
+            <div
+                id="uploadBox"
+                class="uploadBox"
+            >
+
+                <div class="uploadTop">
+
+                    <span id="uploadName">
+                        Uploading...
+                    </span>
+
+                    <span
+                        id="uploadPercent"
+                        class="uploadPercent"
+                    >
+                        0%
+                    </span>
+
+                </div>
+
+                <div class="progress">
+
+                    <div
+                        id="progressBar"
+                        class="progressBar"
+                    ></div>
+
+                </div>
+
+            </div>
+
+
+            <div class="inputArea">
+
+                <button
+                    class="iconBtn"
+                    onclick="openFilePicker()"
+                    title="Send file"
+                >
+                    +
+                </button>
+
+                <input
+                    id="fileInput"
+                    type="file"
+                    onchange="handleFileSelected(event)"
+                >
+
+                <input
+                    id="chatInput"
+                    class="chatInput"
+                    maxlength="2000"
+                    autocomplete="off"
+                    placeholder="Write a message..."
+                    onkeydown="if(event.key==='Enter')sendMessage()"
+                >
+
+                <button
+                    class="sendBtn"
+                    onclick="sendMessage()"
+                >
+                    ↑
+                </button>
+
+            </div>
+
+
+            <div class="chatBottom">
+
+                <button
+                    id="reconnectBtn"
+                    class="bottomBtn reconnectBtn hidden"
+                    onclick="reconnect()"
+                >
+                    ↻ Reconnect
+                </button>
+
+                <button
+                    class="bottomBtn"
+                    onclick="copyCurrentRoom()"
+                >
+                    Copy Code
+                </button>
+
+                <button
+                    class="bottomBtn"
+                    onclick="leaveRoom()"
+                >
+                    Leave
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <footer class="footer">
+        PRIVATE • DIRECT • PEER TO PEER
+    </footer>
+
+</main>
+
+
+<script>
+
+/* =================================
+   VARIABLES
+================================= */
+
+let peer = null;
+let connection = null;
+
+let isHost = false;
+
+let roomCode = "";
+
+let connected = false;
+
+let reconnecting = false;
+
+let reconnectTimer = null;
+
+
+/* =================================
+   FILE TRANSFER
+================================= */
+
+const CHUNK_SIZE = 48 * 1024;
+
+let incomingFiles = {};
+
+let outgoingQueue = [];
+
+let sendingFile = false;
+
+
+/* =================================
+   DOM
+================================= */
+
+const homePage =
+    document.getElementById("homePage");
+
+const chatPage =
+    document.getElementById("chatPage");
+
+const createBtn =
+    document.getElementById("createBtn");
+
+const roomInput =
+    document.getElementById("roomInput");
+
+const waiting =
+    document.getElementById("waiting");
+
+const waitingCode =
+    document.getElementById("waitingCode");
+
+const waitingStatus =
+    document.getElementById("waitingStatus");
+
+const messagesEl =
+    document.getElementById("messages");
+
+const chatInput =
+    document.getElementById("chatInput");
+
+const connectionDot =
+    document.getElementById("connectionDot");
+
+const connectionStatus =
+    document.getElementById("connectionStatus");
+
+const roomMini =
+    document.getElementById("roomMini");
+
+const reconnectBtn =
+    document.getElementById("reconnectBtn");
+
+const fileInput =
+    document.getElementById("fileInput");
+
+const scrollBtn =
+    document.getElementById("scrollBtn");
+
+const uploadBox =
+    document.getElementById("uploadBox");
+
+const uploadName =
+    document.getElementById("uploadName");
+
+const uploadPercent =
+    document.getElementById("uploadPercent");
+
+const progressBar =
+    document.getElementById("progressBar");
+
+
+/* =================================
+   PEER CONFIG
+================================= */
+
+const peerConfig = {
+
+    debug:0,
+
+    config:{
+        iceServers:[
+            {
+                urls:[
+                    "stun:stun.l.google.com:19302",
+                    "stun:stun1.l.google.com:19302"
+                ]
+            }
+        ]
+    }
+
+};
+
+
+/* =================================
+   ROOM CODE
+================================= */
+
+function generateCode(){
+
+    const chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+    let code = "";
+
+    for(let i=0;i<6;i++){
+
+        code += chars.charAt(
+            Math.floor(
+                Math.random()*chars.length
+            )
+        );
+
+    }
+
+    return code;
+}
+
+
+/* =================================
+   PEER ID
+================================= */
+
+function peerIdFromRoom(code){
+
+    return "glass-messenger-" +
+        code;
+}
+
+
+/* =================================
+   CREATE ROOM
+================================= */
+
+function createRoom(){
+
+    if(peer)
+        destroyPeer();
+
+    isHost = true;
+
+    roomCode =
+        generateCode();
+
+    waiting.style.display =
+        "block";
+
+    createBtn.style.display =
+        "none";
+
+    roomInput.disabled = true;
+
+    waitingCode.textContent =
+        roomCode;
+
+    waitingStatus.textContent =
+        "Creating room...";
+
+    waitingStatus.classList.remove(
+        "online"
+    );
+
+    createHost();
+}
+
+
+/* =================================
+   HOST
+================================= */
+
+function createHost(){
+
+    const currentCode =
+        roomCode;
+
+    peer =
+        new Peer(
+            peerIdFromRoom(currentCode),
+            peerConfig
+        );
+
+
+    peer.on("open",()=>{
+
+        if(
+            roomCode !== currentCode ||
+            !peer
+        ){
+
+            return;
+        }
+
+        waitingStatus.textContent =
+            "● Waiting for the other person...";
+
+    });
+
+
+    /*
+       THIS IS THE IMPORTANT PART.
+
+       Same architecture as the
+       working Tic-Tac-Toe game.
+
+       When the second user connects,
+       the Host also enters Chat.
+    */
+
+    peer.on("connection",(conn)=>{
+
+        if(connection){
+
+            try{
+                conn.close();
+            }
+            catch(e){}
+
+            return;
+        }
+
+        connection =
+            conn;
+
+        setupConnection();
+
+    });
+
+
+    peer.on("error",(err)=>{
+
+        console.log(
+            "Host Peer Error:",
+            err
+        );
+
+
+        if(
+            err &&
+            err.type === "unavailable-id"
+        ){
+
+            destroyPeer();
+
+            roomCode =
+                generateCode();
+
+            waitingCode.textContent =
+                roomCode;
+
+            waitingStatus.textContent =
+                "Creating room...";
+
+            setTimeout(
+                createHost,
+                350
+            );
+
+            return;
+        }
+
+
+        waitingStatus.textContent =
+            "Connection error";
+
+    });
+
+
+    peer.on("disconnected",()=>{
+
+        if(isHost){
+
+            waitingStatus.textContent =
+                "Signaling disconnected. Reconnecting...";
+
+            try{
+                peer.reconnect();
+            }
+            catch(e){}
+
+        }
+
+    });
+
+}
+
+
+/* =================================
+   JOIN ROOM
+================================= */
+
+function joinRoom(){
+
+    const code =
+        roomInput.value
+            .trim()
+            .toUpperCase();
+
+
+    if(
+        !/^[A-Z0-9]{6}$/.test(code)
+    ){
+
+        alert(
+            "Room code must contain 6 characters."
+        );
+
+        return;
+    }
+
+
+    roomCode =
+        code;
+
+    isHost = false;
+
+    showChatPage();
+
+    setConnectionStatus(
+        false,
+        "Connecting..."
+    );
+
+    createGuest();
+
+}
+
+
+/* =================================
+   GUEST
+================================= */
+
+function createGuest(){
+
+    if(peer)
+        destroyPeer();
+
+
+    reconnecting = true;
+
+
+    peer =
+        new Peer(
+            peerConfig
+        );
+
+
+    peer.on("open",()=>{
+
+        if(!peer)
+            return;
+
+
+        connection =
+            peer.connect(
+                peerIdFromRoom(roomCode),
+                {
+                    reliable:true,
+                    serialization:"binary"
+                }
+            );
+
+
+        setupConnection();
+
+    });
+
+
+    peer.on("error",(err)=>{
+
+        console.log(
+            "Guest Peer Error:",
+            err
+        );
+
+
+        setConnectionStatus(
+            false,
+            "Room not found or unavailable"
+        );
+
+
+        reconnecting = false;
+
+        showReconnect();
+
+    });
+
+
+    peer.on("disconnected",()=>{
+
+        try{
+            peer.reconnect();
+        }
+        catch(e){}
+
+    });
+
+}
+
+
+/* =================================
+   CONNECTION
+================================= */
+
+function setupConnection(){
+
+    if(!connection)
+        return;
+
+
+    /*
+       Avoid duplicate event registration.
+    */
+
+    const conn =
+        connection;
+
+
+    conn.on("open",()=>{
+
+        if(
+            connection !== conn
+        ){
+
+            return;
+        }
+
+
+        connected = true;
+
+        reconnecting = false;
+
+        clearReconnectTimer();
+
+
+        /*
+           THIS MAKES BOTH SIDES
+           ENTER CHAT.
+
+           Host no longer remains
+           on the room-code screen.
+        */
+
+        waiting.style.display =
+            "none";
+
+        homePage.style.display =
+            "none";
+
+        chatPage.style.display =
+            "block";
+
+
+        roomMini.textContent =
+            roomCode;
+
+
+        setConnectionStatus(
+            true,
+            "● Connected"
+        );
+
+
+        hideReconnect();
+
+
+        addSystemMessage(
+            "Connection established."
+        );
+
+
+        /*
+           Host sends a hello packet.
+           This also confirms the data
+           channel is ready.
+        */
+
+        sendData({
+            type:"hello"
+        });
+
+
+        setTimeout(
+            ()=>{
+                chatInput.focus();
+            },
+            80
+        );
+
+    });
+
+
+    conn.on("data",(data)=>{
+
+        handleIncomingData(data);
+
+    });
+
+
+    conn.on("close",()=>{
+
+        if(
+            connection !== conn
+        ){
+
+            return;
+        }
+
+
+        connected = false;
+
+        connection = null;
+
+
+        setConnectionStatus(
+            false,
+            "● Connection lost"
+        );
+
+
+        showReconnect();
+
+
+        addSystemMessage(
+            "Connection lost."
+        );
+
+    });
+
+
+    conn.on("error",(err)=>{
+
+        console.log(
+            "Data connection error:",
+            err
+        );
+
+    });
+
+}
+
+
+/* =================================
+   DATA
+================================= */
+
+function sendData(data){
+
+    if(
+        connection &&
+        connection.open
+    ){
+
+        try{
+
+            connection.send(data);
+
+            return true;
+
+        }
+        catch(e){
+
+            console.log(e);
+
+        }
+
+    }
+
+    return false;
+}
+
+
+/* =================================
+   INCOMING DATA
+================================= */
+
+function handleIncomingData(data){
+
+    if(!data)
+        return;
+
+
+    /*
+       TEXT
+    */
+
+    if(
+        data.type === "message"
+    ){
+
+        receiveMessage(
+            typeof data.text === "string"
+                ? data.text
+                : ""
+        );
+
+        return;
+    }
+
+
+    /*
+       HELLO
+    */
+
+    if(
+        data.type === "hello"
+    ){
+
+        return;
+    }
+
+
+    /*
+       FILE START
+    */
+
+    if(
+        data.type === "file-start"
+    ){
+
+        incomingFiles[data.id] = {
+
+            id:data.id,
+
+            name:data.name || "file",
+
+            size:Number(data.size) || 0,
+
+            mime:
+                data.mime ||
+                "application/octet-stream",
+
+            chunks:[],
+
+            received:0
+
+        };
+
+        return;
+    }
+
+
+    /*
+       FILE CHUNK
+    */
+
+    if(
+        data.type === "file-chunk"
+    ){
+
+        receiveFileChunk(
+            data
+        );
+
+        return;
+    }
+
+
+    /*
+       FILE END
+    */
+
+    if(
+        data.type === "file-end"
+    ){
+
+        finishIncomingFile(
+            data.id
+        );
+
+        return;
+    }
+
+}
+
+
+/* =================================
+   TEXT CHAT
+================================= */
+
+function sendMessage(){
+
+    if(
+        !connected ||
+        !connection ||
+        !connection.open
+    ){
+
+        return;
+    }
+
+
+    const text =
+        chatInput.value
+            .trim()
+            .slice(0,2000);
+
+
+    if(!text)
+        return;
+
+
+    const sent =
+        sendData({
+
+            type:"message",
+
+            text:text
+
+        });
+
+
+    if(!sent)
+        return;
+
+
+    addMessage(
+        text,
+        true
+    );
+
+
+    chatInput.value = "";
+
+    chatInput.focus();
+
+}
+
+
+/* =================================
+   RECEIVE MESSAGE
+================================= */
+
+function receiveMessage(text){
+
+    if(
+        typeof text !== "string" ||
+        !text
+    ){
+
+        return;
+    }
+
+
+    addMessage(
+        text.slice(0,2000),
+        false
+    );
+
+}
+
+
+/* =================================
+   ADD MESSAGE
+================================= */
+
+function addMessage(
+    text,
+    mine
+){
+
+    const div =
+        document.createElement("div");
+
+
+    div.className =
+        "message " +
+        (mine ? "me" : "enemy");
+
+
+    div.textContent =
+        text;
+
+
+    removeEmpty();
+
+
+    messagesEl.appendChild(
+        div
+    );
+
+
+    scrollToBottom();
+
+}
+
+
+/* =================================
+   SYSTEM MESSAGE
+================================= */
+
+function addSystemMessage(text){
+
+    const div =
+        document.createElement("div");
+
+
+    div.className =
+        "message system";
+
+
+    div.textContent =
+        text;
+
+
+    removeEmpty();
+
+
+    messagesEl.appendChild(
+        div
+    );
+
+
+    scrollToBottom();
+
+}
+
+
+/* =================================
+   REMOVE EMPTY
+================================= */
+
+function removeEmpty(){
+
+    const empty =
+        messagesEl.querySelector(
+            ".empty"
+        );
+
+
+    if(empty)
+        empty.remove();
+
+}
+
+
+/* =================================
+   FILE PICKER
+================================= */
+
+function openFilePicker(){
+
+    /*
+       IMPORTANT:
+
+       Opening the file picker does NOT
+       touch PeerJS or the connection.
+    */
+
+    fileInput.click();
+
+}
+
+
+/* =================================
+   FILE SELECTED
+================================= */
+
+function handleFileSelected(event){
+
+    const files =
+        event.target.files;
+
+
+    if(
+        !files ||
+        !files.length
+    ){
+
+        return;
+    }
+
+
+    const file =
+        files[0];
+
+
+    /*
+       Reset input so selecting the
+       same file again works.
+    */
+
+    fileInput.value = "";
+
+
+    if(
+        !connected ||
+        !connection ||
+        !connection.open
+    ){
+
+        addSystemMessage(
+            "You are offline. Reconnect first."
+        );
+
+        return;
+    }
+
+
+    outgoingQueue.push(
+        file
+    );
+
+
+    processFileQueue();
+
+}
+
+
+/* =================================
+   FILE QUEUE
+================================= */
+
+function processFileQueue(){
+
+    if(sendingFile)
+        return;
+
+
+    if(!outgoingQueue.length)
+        return;
+
+
+    if(
+        !connected ||
+        !connection ||
+        !connection.open
+    ){
+
+        showReconnect();
+
+        return;
+    }
+
+
+    const file =
+        outgoingQueue.shift();
+
+
+    sendFile(
+        file
+    );
+
+}
+
+
+/* =================================
+   SEND FILE
+================================= */
+
+function sendFile(file){
+
+    sendingFile = true;
+
+
+    const id =
+        "file-" +
+        Date.now() +
+        "-" +
+        Math.random()
+            .toString(36)
+            .slice(2);
+
+
+    showUpload(
+        file.name
+    );
+
+
+    const reader =
+        new FileReader();
+
+
+    let offset = 0;
+
+
+    const startPacket = {
+
+        type:"file-start",
+
+        id:id,
+
+        name:file.name,
+
+        size:file.size,
+
+        mime:
+            file.type ||
+            "application/octet-stream"
+
+    };
+
+
+    if(
+        !sendData(startPacket)
+    ){
+
+        sendingFile = false;
+
+        hideUpload();
+
+        outgoingQueue.unshift(
+            file
+        );
+
+        showReconnect();
+
+        return;
+    }
+
+
+    function sendNext(){
+
+        if(
+            !connection ||
+            !connection.open ||
+            !connected
+        ){
+
+            sendingFile = false;
+
+            hideUpload();
+
+            outgoingQueue.unshift(
+                file
+            );
+
+            showReconnect();
+
+            return;
+        }
+
+
+        if(offset >= file.size){
+
+            sendData({
+
+                type:"file-end",
+
+                id:id
+
+            });
+
+
+            addFileMessage(
+                file.name,
+                file.size,
+                file.type,
+                true,
+                null
+            );
+
+
+            sendingFile = false;
+
+            hideUpload();
+
+
+            setTimeout(
+                processFileQueue,
+                30
+            );
+
+
+            return;
+        }
+
+
+        const slice =
+            file.slice(
+                offset,
+                offset + CHUNK_SIZE
+            );
+
+
+        reader.onload =
+            function(){
+
+                const buffer =
+                    reader.result;
+
+
+                const sent =
+                    sendData({
+
+                        type:"file-chunk",
+
+                        id:id,
+
+                        data:buffer
+
+                    });
+
+
+                if(!sent){
+
+                    sendingFile = false;
+
+                    hideUpload();
+
+                    outgoingQueue.unshift(
+                        file
+                    );
+
+                    showReconnect();
+
+                    return;
+                }
+
+
+                offset +=
+                    buffer.byteLength;
+
+
+                updateUpload(
+                    offset,
+                    file.size
+                );
+
+
+                /*
+                   Small delay keeps the UI
+                   responsive on slower systems.
+                */
+
+                setTimeout(
+                    sendNext,
+                    0
+                );
+
+            };
+
+
+        reader.onerror =
+            function(){
+
+                sendingFile = false;
+
+                hideUpload();
+
+                addSystemMessage(
+                    "Could not read the file."
+                );
+
+                processFileQueue();
+
+            };
+
+
+        reader.readAsArrayBuffer(
+            slice
+        );
+
+    }
+
+
+    sendNext();
+
+}
+
+
+/* =================================
+   RECEIVE FILE CHUNK
+================================= */
+
+function receiveFileChunk(data){
+
+    const file =
+        incomingFiles[data.id];
+
+
+    if(!file)
+        return;
+
+
+    if(
+        data.data instanceof ArrayBuffer
+    ){
+
+        file.chunks.push(
+            data.data
+        );
+
+        file.received +=
+            data.data.byteLength;
+
+    }
+    else if(
+        data.data &&
+        data.data.buffer instanceof ArrayBuffer
+    ){
+
+        const buffer =
+            data.data.buffer;
+
+        file.chunks.push(
+            buffer
+        );
+
+        file.received +=
+            buffer.byteLength;
+
+    }
+
+
+    /*
+       No upload UI is needed for
+       receiver. A small system state
+       can be shown when necessary.
+    */
+
+}
+
+
+/* =================================
+   FINISH FILE
+================================= */
+
+function finishIncomingFile(id){
+
+    const file =
+        incomingFiles[id];
+
+
+    if(!file)
+        return;
+
+
+    try{
+
+        const blob =
+            new Blob(
+                file.chunks,
+                {
+                    type:file.mime
+                }
+            );
+
+
+        addFileMessage(
+            file.name,
+            file.size,
+            file.mime,
+            false,
+            blob
+        );
+
+
+    }
+    catch(e){
+
+        console.log(
+            "File assemble error:",
+            e
+        );
+
+        addSystemMessage(
+            "File transfer failed."
+        );
+
+    }
+
+
+    delete incomingFiles[id];
+
+}
+
+
+/* =================================
+   FILE MESSAGE
+================================= */
+
+function addFileMessage(
+    name,
+    size,
+    mime,
+    mine,
+    blob
+){
+
+    removeEmpty();
+
+
+    const div =
+        document.createElement("div");
+
+
+    div.className =
+        "message " +
+        (mine ? "me" : "enemy") +
+        " fileMessage";
+
+
+    const icon =
+        document.createElement("div");
+
+
+    icon.className =
+        "fileIcon";
+
+
+    icon.textContent =
+        mime &&
+        mime.startsWith("image/")
+            ? "▧"
+            : "□";
+
+
+    const fileName =
+        document.createElement("span");
+
+
+    fileName.className =
+        "fileName";
+
+
+    fileName.textContent =
+        name;
+
+
+    const fileSize =
+        document.createElement("span");
+
+
+    fileSize.className =
+        "fileSize";
+
+
+    fileSize.textContent =
+        formatBytes(size);
+
+
+    div.appendChild(
+        icon
+    );
+
+    div.appendChild(
+        fileName
+    );
+
+    div.appendChild(
+        fileSize
+    );
+
+
+    if(blob){
+
+        const download =
+            document.createElement("button");
+
+
+        download.className =
+            "downloadBtn";
+
+
+        download.textContent =
+            "Download";
+
+
+        download.onclick =
+            function(){
+
+                const url =
+                    URL.createObjectURL(
+                        blob
+                    );
+
+
+                const a =
+                    document.createElement("a");
+
+
+                a.href =
+                    url;
+
+                a.download =
+                    name;
+
+                document.body.appendChild(
+                    a
+                );
+
+                a.click();
+
+                a.remove();
+
+
+                setTimeout(
+                    ()=>{
+                        URL.revokeObjectURL(
+                            url
+                        );
+                    },
+                    1000
+                );
+
+            };
+
+
+        div.appendChild(
+            download
+        );
+
+    }
+
+
+    messagesEl.appendChild(
+        div
+    );
+
+
+    scrollToBottom();
+
+}
+
+
+/* =================================
+   FORMAT BYTES
+================================= */
+
+function formatBytes(bytes){
+
+    if(
+        !Number.isFinite(bytes) ||
+        bytes <= 0
+    ){
+
+        return "0 B";
+    }
+
+
+    const units =
+        [
+            "B",
+            "KB",
+            "MB",
+            "GB"
+        ];
+
+
+    const index =
+        Math.min(
+            Math.floor(
+                Math.log(bytes) /
+                Math.log(1024)
+            ),
+            units.length-1
+        );
+
+
+    return (
+        bytes /
+        Math.pow(1024,index)
+    ).toFixed(
+        index === 0 ? 0 : 1
+    ) +
+    " " +
+    units[index];
+
+}
+
+
+/* =================================
+   UPLOAD UI
+================================= */
+
+function showUpload(name){
+
+    uploadBox.style.display =
+        "block";
+
+    uploadName.textContent =
+        name.length > 30
+            ? name.slice(0,27) + "..."
+            : name;
+
+    uploadPercent.textContent =
+        "0%";
+
+    progressBar.style.width =
+        "0%";
+
+}
+
+
+function updateUpload(
+    sent,
+    total
+){
+
+    const percent =
+        total > 0
+            ? Math.min(
+                100,
+                Math.round(
+                    sent / total * 100
+                )
+            )
+            : 100;
+
+
+    uploadPercent.textContent =
+        percent + "%";
+
+
+    progressBar.style.width =
+        percent + "%";
+
+
+    uploadName.textContent =
+        formatBytes(sent) +
+        " / " +
+        formatBytes(total);
+
+}
+
+
+function hideUpload(){
+
+    setTimeout(
+        ()=>{
+            uploadBox.style.display =
+                "none";
+        },
+        300
+    );
+
+}
+
+
+/* =================================
+   CONNECTION STATUS
+================================= */
+
+function setConnectionStatus(
+    online,
+    text
+){
+
+    connectionDot.classList.toggle(
+        "online",
+        online
+    );
+
+
+    connectionStatus.textContent =
+        text;
+
+
+    if(online){
+
+        connectionStatus.style.color =
+            "#43ffc2";
+
+    }
+    else{
+
+        connectionStatus.style.color =
+            "#66707d";
+
+    }
+
+}
+
+
+/* =================================
+   RECONNECT
+================================= */
+
+function showReconnect(){
+
+    reconnectBtn.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+function hideReconnect(){
+
+    reconnectBtn.classList.add(
+        "hidden"
+    );
+
+}
+
+
+function reconnect(){
+
+    if(!roomCode)
+        return;
+
+
+    if(reconnecting)
+        return;
+
+
+    reconnecting = true;
+
+
+    setConnectionStatus(
+        false,
+        "Reconnecting..."
+    );
+
+
+    hideReconnect();
+
+
+    if(connection){
+
+        try{
+            connection.close();
+        }
+        catch(e){}
+
+        connection = null;
+
+    }
+
+
+    if(isHost){
+
+        /*
+           Host keeps the same room ID.
+        */
+
+        if(
+            peer &&
+            !peer.destroyed
+        ){
+
+            try{
+
+                peer.reconnect();
+
+                reconnecting = false;
+
+                waitingStatus.textContent =
+                    "Waiting for connection...";
+
+                return;
+
+            }
+            catch(e){}
+
+        }
+
+
+        createHost();
+
+        return;
+    }
+
+
+    /*
+       Guest creates a new temporary
+       Peer ID and connects again.
+    */
+
+    if(peer){
+
+        try{
+            peer.destroy();
+        }
+        catch(e){}
+
+        peer = null;
+
+    }
+
+
+    setTimeout(
+        ()=>{
+            createGuest();
+        },
+        250
+    );
+
+}
+
+
+/* =================================
+   BACK HOME
+================================= */
+
+function backHome(){
+
+    clearReconnectTimer();
+
+    destroyPeer();
+
+    isHost = false;
+
+    roomCode = "";
+
+    connected = false;
+
+    reconnecting = false;
+
+
+    waiting.style.display =
+        "none";
+
+    createBtn.style.display =
+        "block";
+
+    roomInput.disabled =
+        false;
+
+    roomInput.value =
+        "";
+
+
+    chatPage.style.display =
+        "none";
+
+    homePage.style.display =
+        "block";
+
+
+    clearMessages();
+
+}
+
+
+/* =================================
+   LEAVE ROOM
+================================= */
+
+function leaveRoom(){
+
+    backHome();
+
+}
+
+
+/* =================================
+   SHOW CHAT
+================================= */
+
+function showChatPage(){
+
+    homePage.style.display =
+        "none";
+
+    chatPage.style.display =
+        "block";
+
+    roomMini.textContent =
+        roomCode;
+
+}
+
+
+/* =================================
+   DESTROY PEER
+================================= */
+
+function destroyPeer(){
+
+    clearReconnectTimer();
+
+
+    if(connection){
+
+        try{
+            connection.close();
+        }
+        catch(e){}
+
+        connection = null;
+
+    }
+
+
+    if(peer){
+
+        try{
+            peer.destroy();
+        }
+        catch(e){}
+
+        peer = null;
+
+    }
+
+
+    connected = false;
+
+}
+
+
+/* =================================
+   RECONNECT TIMER
+================================= */
+
+function clearReconnectTimer(){
+
+    if(reconnectTimer){
+
+        clearTimeout(
+            reconnectTimer
+        );
+
+        reconnectTimer = null;
+
+    }
+
+}
+
+
+/* =================================
+   COPY
+================================= */
+
+function copyRoomCode(){
+
+    copyText(
+        roomCode,
+        ()=>{
+            waitingStatus.textContent =
+                "✓ Room code copied";
+
+            setTimeout(
+                ()=>{
+                    if(
+                        !connected
+                    ){
+
+                        waitingStatus.textContent =
+                            "● Waiting for the other person...";
+
+                    }
+                },
+                1200
+            );
+        }
+    );
+
+}
+
+
+function copyCurrentRoom(){
+
+    copyText(
+        roomCode,
+        ()=>{
+            const old =
+                connectionStatus.textContent;
+
+            connectionStatus.textContent =
+                "✓ Code copied";
+
+            setTimeout(
+                ()=>{
+                    if(connected){
+
+                        setConnectionStatus(
+                            true,
+                            "● Connected"
+                        );
+
+                    }
+                    else{
+
+                        setConnectionStatus(
+                            false,
+                            old
+                        );
+
+                    }
+                },
+                1000
+            );
+        }
+    );
+
+}
+
+
+function copyText(
+    text,
+    success
+){
+
+    if(
+        navigator.clipboard &&
+        window.isSecureContext
+    ){
+
+        navigator.clipboard
+            .writeText(text)
+            .then(success)
+            .catch(
+                ()=>{
+                    fallbackCopy(
+                        text,
+                        success
+                    );
+                }
+            );
+
+        return;
+    }
+
+
+    fallbackCopy(
+        text,
+        success
+    );
+
+}
+
+
+function fallbackCopy(
+    text,
+    success
+){
+
+    const area =
+        document.createElement(
+            "textarea"
+        );
+
+
+    area.value =
+        text;
+
+    area.style.position =
+        "fixed";
+
+    area.style.opacity =
+        "0";
+
+    document.body.appendChild(
+        area
+    );
+
+    area.focus();
+
+    area.select();
+
+
+    try{
+
+        const result =
+            document.execCommand(
+                "copy"
+            );
+
+
+        area.remove();
+
+
+        if(result)
+            success();
+
+    }
+    catch(e){
+
+        area.remove();
+
+    }
+
+}
+
+
+/* =================================
+   SCROLL
+================================= */
+
+function scrollToBottom(){
+
+    messagesEl.scrollTop =
+        messagesEl.scrollHeight;
+
+    updateScrollButton();
+
+}
+
+
+function updateScrollButton(){
+
+    const needsScroll =
+        messagesEl.scrollHeight >
+        messagesEl.clientHeight + 5;
+
+
+    const nearBottom =
+        messagesEl.scrollTop +
+        messagesEl.clientHeight >=
+        messagesEl.scrollHeight - 8;
+
+
+    scrollBtn.classList.toggle(
+        "show",
+        needsScroll &&
+        !nearBottom
+    );
+
+}
+
+
+messagesEl.addEventListener(
+    "scroll",
+    updateScrollButton
+);
+
+
+/* =================================
+   CLEAR CHAT
+================================= */
+
+function clearMessages(){
+
+    messagesEl.innerHTML = `
+        <div class="empty">
+            Your private conversation starts here.
+        </div>
+    `;
+
+}
+
+
+/* =================================
+   VISIBILITY
+================================= */
+
+document.addEventListener(
+    "visibilitychange",
+    ()=>{
+        if(
+            document.visibilityState ===
+            "visible"
+        ){
+
+            if(
+                peer &&
+                peer.disconnected
+            ){
+
+                try{
+                    peer.reconnect();
+                }
+                catch(e){}
+
+            }
+
+        }
+    }
+);
+
+
+/* =================================
+   INITIAL
+================================= */
+
+clearMessages();
+
+</script>
+
+</body>
+</html>
